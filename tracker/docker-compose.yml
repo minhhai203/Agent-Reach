@@ -1,0 +1,34 @@
+# video-tracker — một service. CHƯA deploy; chủ dự án tự chạy: docker compose up -d --build
+services:
+  tracker:
+    build: .
+    image: video-tracker:latest
+    env_file: .env
+    # Biến cố định cho container (ghi đè .env để đường dẫn dữ liệu luôn đúng).
+    environment:
+      TRACKER_DB: /data/tracker.sqlite3
+      TRACKER_HOST: 0.0.0.0
+      TRACKER_PORT: "8765"
+    volumes:
+      - tracker-data:/data
+    # Chỉ mở trên loopback của máy chủ. Muốn ra Internet: đặt reverse proxy HTTPS phía trước.
+    ports:
+      - "127.0.0.1:8765:8765"
+    restart: unless-stopped
+    # Để container gọi được dashboard bot Zalo chạy trên máy chủ (127.0.0.1:18792).
+    # Khi đó TRACKER_ZALO_MOD_URL phải là http://host.docker.internal:18792/api/action
+    # (127.0.0.1 trong container là chính container). Chỉ chạy được nếu cổng 18792 trên host
+    # nhận kết nối từ mạng bridge của Docker (dashboard chỉ bind 127.0.0.1 thì KHÔNG tới được).
+    # CHƯA KIỂM THẬT.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  tracker-data:
