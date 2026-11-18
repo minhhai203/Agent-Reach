@@ -21,6 +21,7 @@ Không là:
 |---|---|---|
 | Test tự động | kiểm thử cục bộ | Chạy `python3 -m pytest -q`; test dùng DB tạm và mock, không gọi mạng thật |
 | Lịch sử chỉ số từng video | đã thử trên Mac | `yt-dlp` thu hai kênh thật, lưu ảnh chụp vào DB tạm; chênh lệch giữa các ngày/tuần đã kiểm bằng dữ liệu giả, chưa chờ qua ngày để kiểm thật |
+| Facebook / nhóm Facebook | mới khảo sát, **chưa hỗ trợ trong tracker** | Đã đọc thử nhóm công khai bằng trình duyệt đăng nhập; chưa kiểm chứng khả năng tự động thu thập đầy đủ bài, bình luận và chỉ số từng học viên. Xem mục Facebook bên dưới |
 | TikTok và YouTube qua yt-dlp, báo cáo text, CLI | đã chạy thật trên Mac trước bản sửa nghiệm thu | đồng bộ kênh thật, `progress`, `report`; chưa chạy lại kênh thật sau thay đổi quy tắc trạng thái |
 | yt-dlp từ VPS (16/11/2026) | chỉ thử tay bằng yt-dlp | TikTok đọc được; YouTube bị chặn "Sign in to confirm you're not a bot" → YouTube cần `collect-push` từ Mac hoặc `YOUTUBE_API_KEY`. Chưa chạy chính `tracker` trên VPS |
 | HTTP API và MCP qua HTTP | đã chạy thật trên Mac trước bản sửa nghiệm thu | `tracker serve` thật: kiểm ma trận token, `initialize`, `tools/list` (4 tool chỉ đọc), `tools/call week_progress`; chưa chạy lại server thật sau bản sửa |
@@ -102,6 +103,27 @@ cùng video và thời điểm đến giây được coi là gửi lại, giữ 
 yt-dlp đọc số công khai, nền tảng có thể ẩn hoặc không trả từng trường; không cần API trả phí.
 Bộ thu YouTube Data API sẵn có hiện không lấy chỉ số, nên khi dùng đường đó các trường là thiếu
 dữ liệu. Ảnh chụp là số tích lũy tại lúc đo, không phải số lượt phát sinh kể từ ngày đăng.
+
+## Khảo sát Facebook
+
+**Tracker hiện chưa hỗ trợ Facebook**: không nhận kênh hoặc nhóm Facebook, chưa đồng bộ hay tính
+trạng thái từ Facebook. Kết quả dưới đây là kiểm tra thủ công, không phải tính năng đã triển khai.
+
+- Ngày 18/11/2026, đã mở thử một nhóm công khai bằng Chrome đăng nhập. Trong nhóm có cả video
+  chia sẻ thành bài viết và link Reel được học viên đặt trong bình luận dưới bài giới thiệu.
+  Chỉ xem bài chính hoặc tab Video có thể bỏ sót link trong bình luận; chưa kiểm tra toàn bộ nhóm.
+- Với hai Reel mẫu của cùng một người, giao diện Facebook hiển thị lần lượt **330 và 379 lượt xem**,
+  **10 và 9 cảm xúc**, **7 và 2 bình luận**. Đây là số tại thời điểm kiểm tra; cảm xúc bao gồm
+  nhiều loại phản ứng, không đồng nghĩa toàn bộ là lượt Thích.
+- `yt-dlp` đọc được hai Reel riêng lẻ nhưng trả **105 lượt xem cho mỗi Reel**, không khớp số trên
+  giao diện tại lần kiểm tra; lượt thích và bình luận không được trả về. Chưa xác định nguyên nhân
+  chênh lệch, vì vậy chưa coi lượt xem từ đường này là đáng tin cho nhóm mẫu. `yt-dlp` báo
+  `Unsupported URL` khi thử đọc danh sách bài của nhóm.
+- OpenCLI 2.0.3 bản tạm có lệnh `facebook groups` để liệt kê nhóm và `facebook feed` cho bảng tin
+  chung. Lần thử `groups` trong môi trường tạm quá 25 giây không có kết quả; chưa chứng minh được
+  kết nối với phiên đăng nhập hoặc khả năng lấy đầy đủ bài/bình luận của nhóm qua OpenCLI.
+- Trước khi hỗ trợ tự động cần kiểm chứng độ phủ, liên kết bài/video với đúng học viên, khử trùng
+  và đối chiếu từng chỉ số. Nếu chưa đủ dữ liệu phải trả `insufficient_data`, không báo học viên thiếu bài.
 
 ## Bốn trạng thái
 
